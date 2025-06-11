@@ -119,12 +119,15 @@ namespace MyFace.Data
 
         private static User CreateRandomUser(int index)
         {
+            var salt =  RandomNumberGenerator.GenerateSalt();
             return new User
             {
                 FirstName = Data[index][0],
                 LastName = Data[index][1],
                 Username = Data[index][2],
                 Email = Data[index][3],
+                Salt = salt,
+                HashedPassword = HashGenerator.HashPassword("password123", salt),
                 ProfileImageUrl = ImageGenerator.GetProfileImage(Data[index][2]),
                 CoverImageUrl = ImageGenerator.GetCoverImage(index),
             };
