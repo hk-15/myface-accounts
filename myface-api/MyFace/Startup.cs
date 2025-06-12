@@ -6,6 +6,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MyFace.Repositories;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication;
+using MyFace.Models;
 
 namespace MyFace
 {
@@ -39,10 +44,12 @@ namespace MyFace
             });
 
             services.AddControllers();
-
+            
             services.AddTransient<IInteractionsRepo, InteractionsRepo>();
             services.AddTransient<IPostsRepo, PostsRepo>();
             services.AddTransient<IUsersRepo, UsersRepo>();
+            services.AddAuthentication("BasicAuthentication")
+                .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -59,8 +66,8 @@ namespace MyFace
             }
 
             app.UseHttpsRedirection();
-
             app.UseRouting();
+            app.UseAuthorization();
 
             app.UseCors(CORS_POLICY_NAME);
 

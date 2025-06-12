@@ -1,72 +1,90 @@
-using System; 
-using System.Net; 
-using System.Net.Http; 
-using System.Security.Principal; 
-using System.Text; 
-using System.Threading;      
-using System.Web.Http.Controllers;
-using System.Web.Http.Filters;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using MyFace.Repositories;
+using System;
+using System.Net.Http.Headers;
+using System.Security.Claims;
+using System.Text;
+using System.Text.Encodings.Web;
+using System.Threading.Tasks;
 
 namespace MyFace.Models
 {
-    public class BasicAuthenticationAttribute : AuthorizationFilterAttribute
+    public class BasicAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
-        private const string Realm = "My Realm";
-        public override void OnAuthorization(HttpActionContext actionContext)
+        private readonly IUsersRepo _usersRepo;
+
+        public BasicAuthenticationHandler(
+            IOptionsMonitor<AuthenticationSchemeOptions> options,
+            ILoggerFactory logger,
+            UrlEncoder encoder,
+            IUsersRepo usersRepo)
+            : base(options, logger, encoder)
         {
-            //If the Authorization header is empty or null
-            //then return Unauthorized
-            if (actionContext.Request.Headers.Authorization == null)
-            {
-                actionContext.Response = actionContext.Request
-                    .CreateResponse(HttpStatusCode.Unauthorized);
+            _usersRepo = usersRepo;
+        }
 
-                // If the request was unauthorized, add the WWW-Authenticate header 
-                // to the response which indicates that it require basic authentication
-                if (actionContext.Response.StatusCode == HttpStatusCode.Unauthorized)
-                {
-                    actionContext.Response.Headers.Add("WWW-Authenticate",
-                        string.Format("Basic realm=\"{0}\"", Realm));
-                }
+        protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
+        {
+            if (!Request.Headers.ContainsKey("Authorization"))
+            {
+                return AuthenticateResult.Fail("Missing Authorization Header");
             }
-            else
+
+            var authorizationHeader = Request.Headers["Authorization"].ToString();
+
+            if (!AuthenticationHeaderValue.TryParse(authorizationHeader, out var headerValue))
             {
-                //Get the authentication token from the request header
-                string authenticationToken = actionContext.Request.Headers
-                    .Authorization.Parameter;
+                return AuthenticateResult.Fail("Invalid Authorization Header");
+            }
 
-                //Decode the string
-                string decodedAuthenticationToken = Encoding.UTF8.GetString(
-                    Convert.FromBase64String(authenticationToken));
+            if (!"Basic".Equals(headerValue.Scheme, StringComparison.OrdinalIgnoreCase))
+            {
+                return AuthenticateResult.Fail("Invalid Authorization Scheme");
+            }
 
-                //Convert the string into an string array
-                string[] usernamePasswordArray = decodedAuthenticationToken.Split(':');
+            var credentials = Encoding.UTF8.GetString(Convert.FromBase64String(headerValue.Parameter)).Split(':', 2);
 
-                //First element of the array is the username
-                string username = usernamePasswordArray[0];
+            if (credentials.Length != 2)
+            {
+                return AuthenticateResult.Fail("Invalid Basic Authentication Credentials");
+            }
 
-                //Second element of the array is the password
-                string password = usernamePasswordArray[1];
+            var username = credentials[0];
+            var password = credentials[1];
 
-                //call the login method to check the username and password
-                if (UserValidate.Login(username, password))
+            try
+            {
+
+                var user = await _usersRepo.ValidateUser(username, password);
+                if (user == null)
                 {
-                    var identity = new GenericIdentity(username);
-
-                    IPrincipal principal = new GenericPrincipal(identity, null);
-                    Thread.CurrentPrincipal = principal;
-
-                    if (HttpContext.Current != null)
-                    {
-                        HttpContext.Current.User = principal;
-                    }
+                    return AuthenticateResult.Fail("Invalid Username or Password");
                 }
-                else
+
+                var claims = new[]
                 {
-                    actionContext.Response = actionContext.Request
-                        .CreateResponse(HttpStatusCode.Unauthorized);
-                }
+
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                    new Claim(ClaimTypes.Name, user.Username)
+                };
+
+                var claimsIdentity = new ClaimsIdentity(claims, "Basic");
+
+                var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+
+
+                var authenticationTicket = new AuthenticationTicket(claimsPrincipal, "Basic");
+
+
+                return AuthenticateResult.Success(authenticationTicket);
+            }
+            catch
+            {
+                return AuthenticateResult.Fail("Error occurred during authentication");
             }
         }
+
     }
 }

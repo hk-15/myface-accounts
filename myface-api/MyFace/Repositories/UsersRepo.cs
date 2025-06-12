@@ -1,5 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using MyFace.Data;
 using MyFace.Models.Database;
 using MyFace.Models.Request;
 
@@ -14,7 +18,9 @@ namespace MyFace.Repositories
         User Update(int id, UpdateUserRequest update);
         void Delete(int id);
 
-        User GetByUsername(string username);
+        Task<User> ValidateUser(string username, string password);
+
+        Task<User> GetByUsername(string username);
     }
     
     public class UsersRepo : IUsersRepo
@@ -99,10 +105,26 @@ namespace MyFace.Repositories
             _context.SaveChanges();
         }
 
-        public User GetByUsername(string username)
+        public async Task<User> GetByUsername(string username)
         {
-            return _context.Users
-                .Single(user => user.Username == username);
+            return await _context.Users
+                .SingleAsync(user => user.Username == username);
+        }
+
+        public async Task<User> ValidateUser(string username, string password)
+        {
+            // var user = await _context.Users.FindAsync(username.ToLower());
+           var user = await GetByUsername(username.ToLower());
+
+            if (user != null)
+            {
+                var passwordCheck = HashGenerator.HashPassword(password, user.Salt);
+                if (user.HashedPassword == passwordCheck)
+                {
+                    return user;
+                }
+            }
+            return null;
         }
     }
 }

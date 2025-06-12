@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using MyFace.Models.Request;
 using MyFace.Models.Response;
 using MyFace.Repositories;
@@ -7,6 +8,7 @@ namespace MyFace.Controllers
 {
     [ApiController]
     [Route("feed")]
+    [Authorize(AuthenticationSchemes = "BasicAuthentication")]
     public class FeedController : ControllerBase
     {
         private readonly IPostsRepo _posts;

@@ -1,4 +1,8 @@
+using System;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -10,6 +14,7 @@ namespace MyFace
     {
         public static void Main(string[] args)
         {
+            
             var host = CreateHostBuilder(args).Build();
 
             CreateDbIfNotExists(host);
