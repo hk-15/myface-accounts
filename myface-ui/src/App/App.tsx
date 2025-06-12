@@ -13,9 +13,9 @@ import {CreatePost} from "../Pages/CreatePost/CreatePost";
 function Routes(): ReactElement {
     const loginContext = useContext(LoginContext);
     
-    // if (!loginContext.isLoggedIn) {
-    //     return <Login/>
-    // }
+    if (loginContext.isLoggedIn) {
+        return <Login/>
+    }
     
     return (
         <Switch>

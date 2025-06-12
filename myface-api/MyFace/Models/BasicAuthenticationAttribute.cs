@@ -44,6 +44,7 @@ namespace MyFace.Models
                 return AuthenticateResult.Fail("Invalid Authorization Scheme");
             }
 
+            Console.WriteLine(headerValue.Parameter);
             var credentials = Encoding.UTF8.GetString(Convert.FromBase64String(headerValue.Parameter)).Split(':', 2);
 
             if (credentials.Length != 2)

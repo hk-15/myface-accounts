@@ -51,7 +51,15 @@ export async function fetchUser(userId: string | number): Promise<User> {
 }
 
 export async function fetchPosts(page: number, pageSize: number): Promise<ListResponse<Post>> {
-    const response = await fetch(`https://localhost:5001/feed?page=${page}&pageSize=${pageSize}`);
+    const username = "kplacido0";
+    const password = "password123";
+    const credentials = btoa(username + ':' + password);
+    const response = await fetch(`https://localhost:5001/feed?page=${page}&pageSize=${pageSize}`, {
+    headers: {
+        'Authorization': 'Basic ' + credentials,
+       // 'Content-Type': 'application/json'
+    }}
+    );
     return await response.json();
 }
 
@@ -82,4 +90,24 @@ export async function createPost(newPost: NewPost) {
     if (!response.ok) {
         throw new Error(await response.json())
     }
+}
+
+export async function login(credentials: string) {
+    
+    const username = "kplacido0";
+    const password = "password123";
+     credentials = btoa(username + ':' + password);
+    const response = await fetch('https://localhost:5001/', {
+    headers: {
+        'Authorization': 'Basic ' + credentials
+    
+    }})
+    // .then(response => response.json())
+    // .then(data => console.log(data))
+    // .catch(error => console.error(error));
+
+    if (!response.ok) {
+        throw new Error(await response.json())
+    }
+    return response;
 }
