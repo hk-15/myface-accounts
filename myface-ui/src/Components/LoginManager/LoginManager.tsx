@@ -15,22 +15,22 @@ interface LoginManagerProps {
 }   
 
 export function LoginManager(props: LoginManagerProps): JSX.Element {
-    const [loggedIn, setLoggedIn] = useState(true);
+    const [loggedIn, setLoggedIn] = useState(false);
     const [ header, setHeader ] = useState("");
     const [ credentials, setCredentials ] = useState("");
     async function logIn() {
-        try {
+        //try {
 
-            console.log("Logging in with credentials: " + credentials);
+            //console.log("Logging in with credentials: " + credentials);
     
-            const response: Response = await login(credentials);
-            if (response != null && response.ok) {
+            //const response: Response = await login(credentials);
+            //if (response != null && response.ok) {
                 setLoggedIn(true);
-            }
+            //}
             // Optionally handle response.json() ife needed
-        } catch (error) {
+        //} catch (error) {
          // Handle error if dneeded
-        }
+        //}
     }
     
     function logOut() {

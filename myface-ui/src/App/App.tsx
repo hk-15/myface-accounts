@@ -13,7 +13,7 @@ import {CreatePost} from "../Pages/CreatePost/CreatePost";
 function Routes(): ReactElement {
     const loginContext = useContext(LoginContext);
     
-    if (loginContext.isLoggedIn) {
+    if (!loginContext.isLoggedIn) {
         return <Login/>
     }
     
