@@ -60,6 +60,7 @@ export async function fetchUser(userId: string | number, context: Context): Prom
 }
 
 export async function fetchPosts(page: number, pageSize: number, context: Context): Promise<ListResponse<Post>> {
+    try {
     const response = await fetch(`https://localhost:5001/feed?page=${page}&pageSize=${pageSize}`, {
     headers: {
         'Authorization': context.header,
@@ -67,9 +68,23 @@ export async function fetchPosts(page: number, pageSize: number, context: Contex
     );
     if (response.status == 401) {
         context.isLoggedIn = false;
-        throw new Error(await response.json())
+        context.header = "";
+        window.location.href = "/";
+        };
+    return await response.json();    
+    } catch (error) {
+        console.log(error);
+        window.location.href = "/";
     }
-    return await response.json();
+    return {
+        items: [],
+        totalNumberOfItems: 0,
+        page: page,
+        nextPage: "",
+        previousPage: ""
+    };
+    // }
+    // return await response.json();
 }
 
 export async function fetchPostsForUser(page: number, pageSize: number, userId: string | number, context: Context) {
