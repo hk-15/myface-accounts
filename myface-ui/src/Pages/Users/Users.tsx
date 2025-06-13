@@ -1,16 +1,24 @@
-﻿import React, {useState} from "react";
+﻿import React, {useContext, useState} from "react";
 import {Page} from "../Page/Page";
 import {SearchInput} from "../../Components/SearchInput/SearchInput";
 import {fetchUsers} from "../../Api/apiClient";
 import {UserCard} from "../../Components/UserCard/UserCard";
 import {InfiniteList} from "../../Components/InfititeList/InfiniteList";
 import "./Users.scss";
+import { LoginContext } from "../../Components/LoginManager/LoginManager";
 
 export function Users(): JSX.Element {
     const [searchTerm, setSearchTerm] = useState("");
-    
-    function getUsers(page: number, pageSize: number) {
-        return fetchUsers(searchTerm, page, pageSize);
+    const loginContext = useContext(LoginContext);
+    function getUsers(page: number, pageSize: number, header: string) {
+        return fetchUsers(searchTerm, page, pageSize, loginContext.header);
+        // const response = fetchUsers(searchTerm, page, pageSize, loginContext.header);
+        // if (!response) {
+        //     loginContext.isLoggedIn=false;
+        //     <Redirect to='/login'/>
+        //  }
+
+        //  return response;
     }
     
     return (

@@ -59,6 +59,7 @@ namespace MyFace.Models
             {
 
                 var user = await _usersRepo.ValidateUser(username, password);
+                
                 if (user == null)
                 {
                     return AuthenticateResult.Fail("Invalid Username or Password");
