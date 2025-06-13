@@ -11,9 +11,8 @@ export function Login(): JSX.Element {
     const [password, setPassword] = useState("");
     function tryLogin(event: FormEvent) {
         event.preventDefault();
-        //login(username, password);
         loginContext.encodeCredentials(username, password);
-        loginContext.logIn();
+        loginContext.logIn();  
     }
     
     return (

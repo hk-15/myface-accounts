@@ -1,4 +1,6 @@
-﻿export interface ListResponse<T> {
+﻿import { Redirect } from "react-router-dom";
+
+export interface ListResponse<T> {
     items: T[];
     totalNumberOfItems: number;
     page: number;
@@ -40,49 +42,65 @@ export interface NewPost {
     userId: number;
 }
 
-export async function fetchUsers(searchTerm: string, page: number, pageSize: number): Promise<ListResponse<User>> {
-    const response = await fetch(`https://localhost:5001/users?search=${searchTerm}&page=${page}&pageSize=${pageSize}`);
+export async function fetchUsers(searchTerm: string, page: number, pageSize: number, header: string): Promise<ListResponse<User>> {
+    const response = await fetch(`https://localhost:5001/users?search=${searchTerm}&page=${page}&pageSize=${pageSize}`, {
+    headers: {
+        'Authorization': header
+    
+    }});
+    if (response.status == 401) {
+        
+    }
     return await response.json();
 }
 
-export async function fetchUser(userId: string | number): Promise<User> {
-    const response = await fetch(`https://localhost:5001/users/${userId}`);
+export async function fetchUser(userId: string | number, header: string): Promise<User> {
+    const response = await fetch(`https://localhost:5001/users/${userId}`, {
+    headers: {
+        'Authorization': header
+    }});
     return await response.json();
 }
 
-export async function fetchPosts(page: number, pageSize: number): Promise<ListResponse<Post>> {
-    const username = "kplacido0";
-    const password = "password123";
-    const credentials = btoa(username + ':' + password);
+export async function fetchPosts(page: number, pageSize: number, header: string): Promise<ListResponse<Post>> {
     const response = await fetch(`https://localhost:5001/feed?page=${page}&pageSize=${pageSize}`, {
     headers: {
-        'Authorization': 'Basic ' + credentials,
-       // 'Content-Type': 'application/json'
+        'Authorization': header,
     }}
     );
     return await response.json();
 }
 
-export async function fetchPostsForUser(page: number, pageSize: number, userId: string | number) {
-    const response = await fetch(`https://localhost:5001/feed?page=${page}&pageSize=${pageSize}&postedBy=${userId}`);
+export async function fetchPostsForUser(page: number, pageSize: number, userId: string | number, header: string) {
+    const response = await fetch(`https://localhost:5001/feed?page=${page}&pageSize=${pageSize}&postedBy=${userId}`, {
+    headers: {
+        'Authorization': header,
+    }});
     return await response.json();
 }
 
-export async function fetchPostsLikedBy(page: number, pageSize: number, userId: string | number) {
-    const response = await fetch(`https://localhost:5001/feed?page=${page}&pageSize=${pageSize}&likedBy=${userId}`);
+export async function fetchPostsLikedBy(page: number, pageSize: number, userId: string | number, header: string) {
+    const response = await fetch(`https://localhost:5001/feed?page=${page}&pageSize=${pageSize}&likedBy=${userId}`, {
+    headers: {
+        'Authorization': header,
+    }});
     return await response.json();
 }
 
-export async function fetchPostsDislikedBy(page: number, pageSize: number, userId: string | number) {
-    const response = await fetch(`https://localhost:5001/feed?page=${page}&pageSize=${pageSize}&dislikedBy=${userId}`);
+export async function fetchPostsDislikedBy(page: number, pageSize: number, userId: string | number, header: string) {
+    const response = await fetch(`https://localhost:5001/feed?page=${page}&pageSize=${pageSize}&dislikedBy=${userId}`, {
+    headers: {
+        'Authorization': header,
+    }});
     return await response.json();
 }
 
-export async function createPost(newPost: NewPost) {
+export async function createPost(newPost: NewPost, header: string) {
     const response = await fetch(`https://localhost:5001/posts/create`, {
         method: "POST",
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": header
         },
         body: JSON.stringify(newPost),
     });
@@ -94,9 +112,9 @@ export async function createPost(newPost: NewPost) {
 
 export async function login(credentials: string) {
     
-    const username = "kplacido0";
-    const password = "password123";
-     credentials = btoa(username + ':' + password);
+    // const username = "kplacido0";
+    // const password = "password123";
+    //  credentials = btoa(username + ':' + password);
     const response = await fetch('https://localhost:5001/', {
     headers: {
         'Authorization': 'Basic ' + credentials
