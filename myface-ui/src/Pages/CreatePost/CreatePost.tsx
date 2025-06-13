@@ -17,7 +17,7 @@ export function CreatePostForm(): JSX.Element {
     function submitForm(event: FormEvent) {
         event.preventDefault();
         setStatus("SUBMITTING");
-        createPost({message, imageUrl, userId: parseInt(userId)}, loginContext.header)
+        createPost({message, imageUrl, userId: parseInt(userId)}, loginContext)
             .then(() => setStatus("FINISHED"))
             .catch(() => setStatus("ERROR"));
     }

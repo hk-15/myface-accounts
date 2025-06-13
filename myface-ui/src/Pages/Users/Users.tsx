@@ -6,12 +6,13 @@ import {UserCard} from "../../Components/UserCard/UserCard";
 import {InfiniteList} from "../../Components/InfititeList/InfiniteList";
 import "./Users.scss";
 import { LoginContext } from "../../Components/LoginManager/LoginManager";
+import { Context } from "node:vm";
 
 export function Users(): JSX.Element {
     const [searchTerm, setSearchTerm] = useState("");
     const loginContext = useContext(LoginContext);
-    function getUsers(page: number, pageSize: number, header: string) {
-        return fetchUsers(searchTerm, page, pageSize, loginContext.header);
+    function getUsers(page: number, pageSize: number, context: Context) {
+        return fetchUsers(searchTerm, page, pageSize, loginContext);
         // const response = fetchUsers(searchTerm, page, pageSize, loginContext.header);
         // if (!response) {
         //     loginContext.isLoggedIn=false;

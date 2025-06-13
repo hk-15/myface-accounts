@@ -1,4 +1,5 @@
-﻿import { Redirect } from "react-router-dom";
+﻿import { Context } from "node:vm";
+import { Redirect } from "react-router-dom";
 
 export interface ListResponse<T> {
     items: T[];
@@ -42,65 +43,65 @@ export interface NewPost {
     userId: number;
 }
 
-export async function fetchUsers(searchTerm: string, page: number, pageSize: number, header: string): Promise<ListResponse<User>> {
+export async function fetchUsers(searchTerm: string, page: number, pageSize: number, context: Context): Promise<ListResponse<User>> {
     const response = await fetch(`https://localhost:5001/users?search=${searchTerm}&page=${page}&pageSize=${pageSize}`, {
     headers: {
-        'Authorization': header
-    
+        'Authorization': context.header
     }});
+    return await response.json();
+}
+
+export async function fetchUser(userId: string | number, context: Context): Promise<User> {
+    const response = await fetch(`https://localhost:5001/users/${userId}`, {
+    headers: {
+        'Authorization': context.header
+    }});
+    return await response.json();
+}
+
+export async function fetchPosts(page: number, pageSize: number, context: Context): Promise<ListResponse<Post>> {
+    const response = await fetch(`https://localhost:5001/feed?page=${page}&pageSize=${pageSize}`, {
+    headers: {
+        'Authorization': context.header,
+    }}
+    );
     if (response.status == 401) {
-        
+        context.isLoggedIn = false;
+        throw new Error(await response.json())
     }
     return await response.json();
 }
 
-export async function fetchUser(userId: string | number, header: string): Promise<User> {
-    const response = await fetch(`https://localhost:5001/users/${userId}`, {
-    headers: {
-        'Authorization': header
-    }});
-    return await response.json();
-}
-
-export async function fetchPosts(page: number, pageSize: number, header: string): Promise<ListResponse<Post>> {
-    const response = await fetch(`https://localhost:5001/feed?page=${page}&pageSize=${pageSize}`, {
-    headers: {
-        'Authorization': header,
-    }}
-    );
-    return await response.json();
-}
-
-export async function fetchPostsForUser(page: number, pageSize: number, userId: string | number, header: string) {
+export async function fetchPostsForUser(page: number, pageSize: number, userId: string | number, context: Context) {
     const response = await fetch(`https://localhost:5001/feed?page=${page}&pageSize=${pageSize}&postedBy=${userId}`, {
     headers: {
-        'Authorization': header,
+        'Authorization': context.header,
     }});
     return await response.json();
 }
 
-export async function fetchPostsLikedBy(page: number, pageSize: number, userId: string | number, header: string) {
+export async function fetchPostsLikedBy(page: number, pageSize: number, userId: string | number, context: Context) {
     const response = await fetch(`https://localhost:5001/feed?page=${page}&pageSize=${pageSize}&likedBy=${userId}`, {
     headers: {
-        'Authorization': header,
+        'Authorization': context.header,
     }});
     return await response.json();
 }
 
-export async function fetchPostsDislikedBy(page: number, pageSize: number, userId: string | number, header: string) {
+export async function fetchPostsDislikedBy(page: number, pageSize: number, userId: string | number, context: Context) {
     const response = await fetch(`https://localhost:5001/feed?page=${page}&pageSize=${pageSize}&dislikedBy=${userId}`, {
     headers: {
-        'Authorization': header,
+        'Authorization': context.header,
     }});
     return await response.json();
 }
 
-export async function createPost(newPost: NewPost, header: string) {
+export async function createPost(newPost: NewPost, context: Context) {
     const response = await fetch(`https://localhost:5001/posts/create`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": header
+            "Authorization": context.header
         },
         body: JSON.stringify(newPost),
     });
@@ -110,22 +111,22 @@ export async function createPost(newPost: NewPost, header: string) {
     }
 }
 
-export async function login(credentials: string) {
+// export async function login(credentials: string) {
     
-    // const username = "kplacido0";
-    // const password = "password123";
-    //  credentials = btoa(username + ':' + password);
-    const response = await fetch('https://localhost:5001/', {
-    headers: {
-        'Authorization': 'Basic ' + credentials
+//     // const username = "kplacido0";
+//     // const password = "password123";
+//     //  credentials = btoa(username + ':' + password);
+//     const response = await fetch('https://localhost:5001/', {
+//     headers: {
+//         'Authorization': 'Basic ' + credentials
     
-    }})
-    // .then(response => response.json())
-    // .then(data => console.log(data))
-    // .catch(error => console.error(error));
+//     }})
+//     // .then(response => response.json())
+//     // .then(data => console.log(data))
+//     // .catch(error => console.error(error));
 
-    if (!response.ok) {
-        throw new Error(await response.json())
-    }
-    return response;
-}
+//     if (!response.ok) {
+//         throw new Error(await response.json())
+//     }
+//     return response;
+// }

@@ -1,5 +1,4 @@
 ﻿import React, {createContext, ReactNode, useState} from "react";
-import {login} from "../../Api/apiClient";
 
 export const LoginContext = createContext({
     isLoggedIn: false,
